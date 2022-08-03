@@ -1,0 +1,61 @@
+//SPDX-License-Identifier: Unlicense
+
+pragma solidity >=0.7.0 <0.9.0;
+
+contract pvrshows
+{
+  struct shows{
+         address screen;
+         string moviename ;
+         uint MovieDate ;
+         uint price ;
+         uint totalticket;
+         uint ticketleft;
+     }
+
+     mapping(uint=>shows) public show;
+     mapping(address=>mapping(uint=>uint)) public tickets;
+     uint public nextmovie ;
+
+     function Addmovie(string memory MovieName,uint MovieDate,uint MoviePrice,uint TotalTicket) public{
+
+     require (MovieDate>block.timestamp,'Date expired');
+     require (TotalTicket>0,'Tickets sold');
+     show[nextmovie]=shows(msg.sender,MovieName,MovieDate,MoviePrice,TotalTicket,TotalTicket);
+      nextmovie++;
+     }
+
+     function BuyTicket(uint256 screenid,uint quantity)external payable{
+     
+     require (show[screenid].MovieDate>block.timestamp,'Date expired');
+     require (show[screenid].MovieDate!=0,'Date does not exist');
+     shows storage _show = show[screenid];
+
+      require(msg.value==(_show.price*quantity),'your account has not sufficient balance');
+       require(_show.ticketleft>=quantity,'Tickets not available');
+       _show.ticketleft-=quantity;
+       tickets[msg.sender][screenid]+=quantity;
+    
+     }
+
+function TransferTicket(uint screenid,uint quantity,address to) external
+{
+
+   require (show[screenid].MovieDate>block.timestamp,'Date expired');
+     require (show[screenid].MovieDate!=0,'Date does not exist');
+     require(tickets[msg.sender][screenid]>=quantity,'Tickets not available');
+     tickets[msg.sender][screenid]-=quantity;
+      tickets[to][screenid]+=quantity;
+
+}
+     }
+
+
+
+
+
+
+
+
+ 
+
